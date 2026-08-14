@@ -5,19 +5,20 @@
 using namespace std;
 
 
-const int rows = 80;
-const int cols = 100;
+const int rows = 40;
+const int cols = 50;
 int terminalWidth = 1000;
 int terminalHeight = 800;
-int squareSize = 10;
+int squareSize = 20;
 
+bool Paused = false; 
 
-void populateGrid(int numbers[rows][cols], int rows, int cols) {
+void populateGrid(int numbers[rows][cols], int ROWS, int COLS) {
 
     srand(time(0)); // Seed the random number generator
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
 
             int random_num = (rand() % 100) + 1; // Range 1 to 100
             if (random_num <= 20) { // 20% chance of being 1
@@ -30,14 +31,14 @@ void populateGrid(int numbers[rows][cols], int rows, int cols) {
     }
 }
 
-void checkNeighbours(int numbers[rows][cols], int newNumbers[rows][cols], int rows, int cols) {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+void checkNeighbours(int numbers[rows][cols], int newNumbers[rows][cols], int ROWS, int COLS) {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
 
             int liveNeighbours = 0;
             for (int x = i -1; x <= i + 1; x++) {
                 for (int y = j - 1; y <= j + 1; y++) {
-                    if (x >= 0 && x < rows && y >= 0 && y < cols) { // Check bounds
+                    if (x >= 0 && x < ROWS && y >= 0 && y < COLS) { // Check bounds
                         if (x == i && y == j) {
                             continue;
                         }
@@ -73,9 +74,9 @@ void checkNeighbours(int numbers[rows][cols], int newNumbers[rows][cols], int ro
     }
 }
 
-void printGrid(int numbers[rows][cols], int rows, int cols) {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+void printGrid(int numbers[rows][cols], int ROWS, int COLS) {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
 			DrawRectangleLines(j * squareSize, i * squareSize, squareSize, squareSize, LIGHTGRAY);
 			
             if (numbers[i][j] == 1) {
@@ -85,9 +86,9 @@ void printGrid(int numbers[rows][cols], int rows, int cols) {
     }
 }
 
-void copyGrid(int numbers[rows][cols], int newNumbers[rows][cols], int rows, int cols) {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+void copyGrid(int numbers[rows][cols], int newNumbers[rows][cols], int ROWS, int COLS) {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
             numbers[i][j] = newNumbers[i][j];
         }
     }
@@ -121,14 +122,44 @@ int main()
     InitWindow(terminalWidth, terminalHeight, "Conway's Game of Life");
 
 	float timer = 0.0f;
+	float speed = 0.1f;
 
 	while (!WindowShouldClose())
 	{
     	timer += GetFrameTime();
 
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			Paused = !Paused;
+		}
+
+		if (IsKeyPressed(KEY_R))
+		{
+			populateGrid(numbers, rows, cols);
+		}
+
+		if(IsKeyPressed(KEY_C))
+		{
+			for (int i = 0; i < rows; i++) {
+				for (int j = 0; j < cols; j++) {
+					numbers[i][j] = 0;
+				}
+			}
+		}
+
+		if(IsKeyPressed(KEY_UP))
+		{
+			speed *= 2.0f; // Increase speed by 50%
+		}
+
+		if(IsKeyPressed(KEY_DOWN))
+		{
+			speed /= 2.0f; // Decrease speed by 50%
+		}
+
 		mouseInteraction(numbers);
 
-    	if (timer >= 0.1f)
+    	if (timer >= speed && !Paused)
     	{
 			checkNeighbours(numbers, newNumbers, rows, cols);
 
@@ -149,4 +180,4 @@ int main()
     CloseWindow();
 
     return 0;
-}
+} 
